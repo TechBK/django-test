@@ -1,0 +1,41 @@
+{% set user = request.user %}
+{% set messages = get_messages(request) %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock%}</title>
+    {% endblock %}
+</head>
+<body>
+    <div id="header">
+        {% block header%}
+            <h1>Student Networking</h1>
+            {% if user.is_authenticated() %}
+                <p>Welcome, {{ user.get_username() }}. Thanks for logging in.</p>
+                <a href={{url('users:logout')}}>Log Out</a>
+            {% else %}
+                <p>Welcome, new user. Please <a href={{url('users:login')}}>log in.</a></p>
+            {% endif %}
+            <h2>{{self.title()}}</h2>
+        {% endblock%}
+    </div>
+
+    <div id="content">
+        {% block messages %}
+            <div id ="messages">
+                {% if messages %}
+                    {% for message in messages%}<p>{{message}}</p>{% endfor %}
+                {% endif %}
+            </div>
+        {% endblock %}
+        {% block content %}
+        {% endblock %}
+    </div>
+    <div id="footer">
+        {% block footer %}{% endblock %}
+    </div>
+</body>
+</html>

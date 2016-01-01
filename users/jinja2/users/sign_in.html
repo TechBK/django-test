@@ -1,0 +1,16 @@
+{% extends 'users/base.html' %}
+{% block title %}Log In{% endblock %}
+{% block content%}
+<form action="{{url('users:signin')}}" method="post">
+    <div style="display:none">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    </div>
+    <label for="username">Your name: </label>
+    <input id="username" type="text" name="username">
+    <label for="password1">Password: </label>
+    <input id="password1" type="password" name="password1">
+    <label for="password2">Re-Password: </label>
+    <input id="password2" type="password" name="password2">
+    <input type="submit" value="Sign In">
+</form>
+{% endblock %}
