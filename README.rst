@@ -2,7 +2,7 @@
 Student Networking
 ==================
 
-.: contents::
+.. contents::
 
 
 Install:
