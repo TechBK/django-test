@@ -1,0 +1,21 @@
+{% extends 'users/base.html' %}
+{% block title %}Log In{% endblock %}
+
+{% block header %}
+    {{ super() }}
+    <p>If you dont have account, sign in <a href={{url('users:signin')}}>here</a>.</p>
+{% endblock %}
+
+
+{% block content%}
+<form action="{{url('users:login')}}" method="post">
+    <div style="display:none">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    </div>
+    <label for="username">Your name: </label>
+    <input id="username" type="text" name="username">
+    <label for="password">Password: </label>
+    <input id="password" type="password" name="password">
+    <input type="submit" value="Login">
+</form>
+{% endblock %}

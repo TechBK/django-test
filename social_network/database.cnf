@@ -1,0 +1,5 @@
+[client]
+database = 'social_network'
+user = 'root'
+password = 'baogavn'
+default-character-set = utf8

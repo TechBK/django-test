@@ -1,0 +1,55 @@
+{% extends 'users/base.html' %}
+{% block title %}Notes{% endblock %}
+
+{% block header %}
+    {{ super() }}
+    <p>If you dont have account, sign in <a href={{url('users:signin')}}>here</a>.</p>
+{% endblock %}
+
+
+
+
+{% block content %}
+    <div id='notes'>
+    <table>
+        <tr>
+            <td>Note content</td>
+            <td>Time</td>
+            <td>Content Type</td>
+            <td>Is Public</td>
+            <td>Is Delteted</td>
+            <td>Tag</td>
+        </tr>
+        {% for note in notes %}
+            <tr>
+                <td>
+                    {% for text in note.notetext_set.all() %}
+                        {{ text.text }} - {{ text.position }}
+                    {% endfor %}
+                </td>
+                <td>{{ note.time }}</td>
+                <td>{{ note.content_type }}</td>
+                <td>{{ note.is_public }}</td>
+                <td>{{ note.is_deleted }}</td>
+                <td>
+                {% for tag in note.tags.all() %}
+                    {{ tag }},
+                {% endfor %}
+                </td>
+            </tr>
+        {%  endfor %}
+    </table>
+
+    </div>
+    <div id="form">
+    <form action="{{url('notes:index')}}" method="post">
+        <div style="display:none">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        </div>
+        <input id="text" type="text" name="text" placeholder="Note here...">
+        <input id="tags" type="text" name="tags" placeholder="Tags...">
+        <input type="submit" value="Enter">
+    </form>
+    </div>
+
+{% endblock %}

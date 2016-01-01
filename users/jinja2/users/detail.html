@@ -1,0 +1,14 @@
+{% extends 'users/base.html' %}
+{% block title %}Profile{% endblock %}
+
+
+{% block content%}
+<div>ID: {{user.id}}</div>
+<div>User: Name:{{user.username}}</div>
+<div>Email: {{user.email}}</div>
+<div>First Name: {{user.first_name}}</div>
+<div>Last Name: {{user.last_name}}</div>
+<div>Super User: {{user.is_superuser}}</div>
+<div>Staff: {{user.is_staff}}</div>
+<div>Active: {{user.is_active}}</div>
+{% endblock %}
