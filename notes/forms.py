@@ -18,3 +18,4 @@ class MultiTagField(forms.Field):
 class NoteForm(forms.Form):
     tags = MultiTagField()
     text = forms.CharField()
+    is_public = forms.BooleanField(required=False)

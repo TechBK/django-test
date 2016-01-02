@@ -27,7 +27,7 @@ class Note(models.Model):
     is_deleted = models.BooleanField(default=False)
     tags = models.ManyToManyField(Tag)
     users = models.ManyToManyField(User)
-    is_public = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return "Type: %s, Time: %s" % (self.content_type, self.time)

@@ -1,21 +1,28 @@
 {% extends 'users/base.html' %}
-{% block title %}Notes{% endblock %}
+{% block title %}Public Note{% endblock %}
 
 {% block content %}
     <div id='notes'>
     <table>
         <tr>
             <th>Note ID</th>
+            <th>User</th>
             <th>Note content</th>
             <th>Time</th>
             <th>Content Type</th>
             <th>Is Public</th>
             <th>Is Delteted</th>
             <th>Tag</th>
+            <th>Action</th>
         </tr>
         {% for note in notes %}
             <tr>
                 <td>{{ note.id }}</td>
+                <td>
+                    {% for user in note.users.all() %}
+                        {{ user.username }},
+                    {% endfor %}
+                </td>
                 <td>
                     {% for text in note.notetext_set.all() %}
                         {{ text.text }} - pos: {{ text.position }} - id: {{ text.id }}
@@ -30,22 +37,19 @@
                     {{ tag }},
                 {% endfor %}
                 </td>
+                <td>
+                    <form action="{{url('notes:add')}}" method="post">
+                        <div style="display:none">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        </div>
+                        <input type="hidden" name="note_id" value="{{note.id}}">
+                        <input type="submit" value="add note">
+                    </form>
+
+                </td>
             </tr>
         {%  endfor %}
     </table>
 
     </div>
-    <div id="form">
-    <form action="{{url('notes:index')}}" method="post">
-        <div style="display:none">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        </div>
-        <input id="text" type="text" name="text" placeholder="Note here...">
-        <input id="tags" type="text" name="tags" placeholder="Tags...">
-        <input id="is_public" type="checkbox" name="is_public">
-        <label for="is_public">Is Public</label>
-        <input type="submit" value="Enter">
-    </form>
-    </div>
-
 {% endblock %}
