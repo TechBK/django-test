@@ -20,6 +20,7 @@ class NotesView(LoginRequiredMixin, generic.TemplateView):
         Cho nay chua toi uu phan truy van notes
         :return: QuerySet - danh sach note cua nguoi dung
         """
+        # BUG?: users=self.request.user co dung ko?
         notes = Note.objects.filter(users=self.request.user)
         return notes
 
@@ -37,17 +38,9 @@ class NotesView(LoginRequiredMixin, generic.TemplateView):
             note.notetext_set.create(text=noteform.cleaned_data['text'], position=0)
             for tag_name in noteform.cleaned_data['tags']:
                 tag, created = Tag.objects.get_or_create(name=tag_name)
-                # tag.note_set.add(note)
-                # tag.save()
                 note.tags.add(tag)
-            # Tag.objects.get_or_create(name='public',is_public)
-            # note.tags.
             note.save()
             return redirect('notes:index')
-            # tags = [Tag.objects.get_or_create(name=str(tag_name)) for tag_name in noteform.cleaned_data['tags']]
-            # note.tags.set(tags)
-            # for tag_name in noteform.cleaned_data['tags']
-            # note.tags.get_or_create(name=tag_name)
         # data = noteform.errors
         data = [request.POST, noteform.errors]
         return JsonResponse(data, safe=False)
@@ -59,6 +52,8 @@ class PublicNoteView(generic.TemplateView):
     """
     template_name = 'notes/public_notes.html'
 
+    def __init__(self):
+        pass
     def get_query(self):
         """
 
@@ -98,4 +93,4 @@ class AddNoteView(LoginRequiredMixin, generic.View):
             note.save()
 
             return redirect('notes:index')
-        return JsonResponse({'errors':'da co san roi nhe'})
+        return JsonResponse({'errors':True, 'message_errors':'Note da co trong reponse cua ban!'})
