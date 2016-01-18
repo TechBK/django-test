@@ -36,6 +36,10 @@ For ImageField::
 
 Note: link reference https://pillow.readthedocs.org/en/3.0.0/installation.html#linux-installation
 
+Install Jinja2::
+::
+    pip3 install Jinja2
+
 Run server
 ==========
 In root directory::
