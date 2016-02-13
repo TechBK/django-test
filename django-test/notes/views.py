@@ -94,3 +94,49 @@ class AddNoteView(LoginRequiredMixin, generic.View):
 
             return redirect('notes:index')
         return JsonResponse({'errors':True, 'error_messages':'Note da co trong reponse cua ban!'})
+
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from django.http import Http404
+from .serializers import UserSerializer, NoteTextSerializer, NoteSerializer, TagSerializer
+
+class UserListApi(APIView):
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class UserDetailApi(APIView):
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = UserSerializer(user, context={'request': request})
+        return Response(serializer.data)
+
+
+class NoteListApi(APIView):
+    def get(self, request, pk, format=None):
+        notes = Note.objects.filter(users__pk=pk)
+        serializer = NoteSerializer(notes, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class NoteDetailApi(APIView):
+    def get_object(self, pk):
+        try:
+            return Note.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        note = self.get_object(pk)
+        serializer = NoteSerializer(note, context={'request': request})
+        return Response(serializer.data)

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'snippets',
     'react.apps.ReactConfig',
     'notes.apps.NotesConfig',
     'users.apps.UsersConfig',
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -92,24 +94,27 @@ WSGI_APPLICATION = 'social_network.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'social_network',
-        'USER': 'root',
-        'PASSWORD': 'baogavn',
-        'HOST': 'localhost',
-        # 'OPTIONS': {
-        #     'read_default_file': 'database.cnf',
-        # },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+# mysql databases config
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'social_network',
+#         'USER': 'root',
+#         'PASSWORD': 'baogavn',
+#         'HOST': 'localhost',
+#         # 'OPTIONS': {
+#         #     'read_default_file': 'database.cnf',
+#         # },
+#     }
+# }
 
 
 # Password validation

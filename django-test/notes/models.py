@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True) # thieu unique
     is_thread = models.BooleanField(default=False)
 
     def __str__(self):
@@ -35,7 +35,7 @@ class Note(models.Model):
 
 class NoteImage(models.Model):
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
-    file = models.ImageField(upload_to='%Y/%m/%d/')
+    # file = models.ImageField(upload_to='%Y/%m/%d/')
     position = models.PositiveSmallIntegerField()
 
 
