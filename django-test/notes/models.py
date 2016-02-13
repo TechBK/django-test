@@ -25,7 +25,7 @@ class Note(models.Model):
     content_type = models.CharField(max_length=2, choices=CONTENT_TYPE_CHOICES, default=TEXT)
     time = models.DateTimeField(default=timezone.now)
     is_deleted = models.BooleanField(default=False)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, related_name='notes')
     users = models.ManyToManyField(User)
     is_public = models.BooleanField(default=False)
 

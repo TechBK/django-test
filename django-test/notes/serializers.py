@@ -9,9 +9,11 @@ class URLReadOnlyField(serializers.ReadOnlyField):
     def __init__(self, **kwargs):
         self.view_name = kwargs.pop('view_name', None)
         assert self.view_name is not None, 'The `view_name` argument is required.'
+        self.slug = kwargs.pop('slug', None)
         kwargs['source'] = '*'
         super(URLReadOnlyField, self).__init__(**kwargs)
 
+    # doan nay da duoc thay the = kwargs['source'] = '*'
     # def get_attribute(self, instance):
     #     return instance
 
@@ -35,13 +37,27 @@ class URLReadOnlyField(serializers.ReadOnlyField):
         return reverse(self.view_name, kwargs=kwargs, request=request)
 
 
+
 class UserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
+    url = serializers.HyperlinkedIdentityField(
+        view_name='notes:users-detail',
+        lookup_field='username',
+        lookup_url_kwarg='username',
+        source='*',
+        read_only=True
+    )
     username = serializers.CharField(read_only=True)
     first_name = serializers.CharField(allow_blank=True)
     last_name = serializers.CharField(allow_blank=True)
     email = serializers.EmailField(allow_blank=True)
-    notes_url = URLReadOnlyField(view_name='notes:notes')
+    notes_url = serializers.HyperlinkedRelatedField(
+        view_name='notes:notes',
+        lookup_field='username',
+        lookup_url_kwarg='username',
+        source='*',
+        read_only=True
+    )
     last_login = serializers.DateTimeField()
     date_joined = serializers.DateTimeField()
 
@@ -71,18 +87,23 @@ class TagSerializer(serializers.Serializer):
 
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
+    url = URLReadOnlyField(view_name='notes:notes-detail')
     content_type = serializers.CharField()
     time = serializers.DateTimeField()
     is_deleted = serializers.BooleanField(default=False)
     # tags_url = URLReadOnlyField(viewname='tag-of-note')
     # users = serializers.HyperlinkedRelatedField(view_name='notes:users-detail', queryset=User.objects.all())
-    users = URLReadOnlyField(view_name='notes:users-detail')
+    # users = URLReadOnlyField(view_name='notes:users-detail')
+    # users = UserSerializer(many=True)
+    users = serializers.SlugRelatedField(many=True,
+                                         read_only=True,
+                                         slug_field='username')
     is_public = serializers.BooleanField(default=False)
-    tag = TagWriteOnlyField()
+    # tags = TagWriteOnlyField()
     # content_url = URLReadOnlyField(viewname='content-of-note')
     notetext_set = NoteTextSerializer(many=True)
-    tags = TagSerializer(many=True)
-    # new = serializers.URLField(source='*')
+    # tags = TagSerializer(many=True)
+    tags_nest = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', source='tags')
 
 
 
