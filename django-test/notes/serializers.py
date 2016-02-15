@@ -1,11 +1,14 @@
-from django.utils import timezone
+# from django.utils import timezone
 from rest_framework import serializers
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
-from django.contrib.auth import forms as auth_forms
+# from django.contrib.auth import forms as auth_forms
 
 
 class URLReadOnlyField(serializers.ReadOnlyField):
+    """
+    Class nay ko dung :v :v
+    """
     def __init__(self, **kwargs):
         self.view_name = kwargs.pop('view_name', None)
         assert self.view_name is not None, 'The `view_name` argument is required.'
@@ -37,26 +40,25 @@ class URLReadOnlyField(serializers.ReadOnlyField):
         return reverse(self.view_name, kwargs=kwargs, request=request)
 
 
-
 class UserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     url = serializers.HyperlinkedIdentityField(
         view_name='notes:users-detail',
         lookup_field='username',
         lookup_url_kwarg='username',
-        source='*',
-        read_only=True
+        # source='username'
+        # read_only=True # This field is always read-only.
     )
     username = serializers.CharField(read_only=True)
     first_name = serializers.CharField(allow_blank=True)
     last_name = serializers.CharField(allow_blank=True)
     email = serializers.EmailField(allow_blank=True)
-    notes_url = serializers.HyperlinkedRelatedField(
-        view_name='notes:notes',
+    notes_url = serializers.HyperlinkedIdentityField(
+        view_name='notes:notes-of-user',
         lookup_field='username',
         lookup_url_kwarg='username',
-        source='*',
-        read_only=True
+        # source='username'
+        # read_only=True
     )
     last_login = serializers.DateTimeField()
     date_joined = serializers.DateTimeField()
@@ -74,36 +76,57 @@ class TagWriteOnlyField(serializers.CharField):
 
 class NoteTextSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    note = URLReadOnlyField(view_name='notes:notes-detail')
+    note_url = serializers.HyperlinkedIdentityField(
+        view_name='notes:notes-detail',
+        source='note.id',
+    )
     text = serializers.CharField()
     position = serializers.IntegerField()
 
 
 class TagSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
+    notes_url = serializers.HyperlinkedIdentityField(
+        view_name='notes:notes-of-tag',
+        lookup_field='name',
+        lookup_url_kwarg='name',
+        # source='name'
+    )
     name = serializers.CharField()
     is_thread = serializers.BooleanField()
 
 
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    url = URLReadOnlyField(view_name='notes:notes-detail')
+    url = serializers.HyperlinkedIdentityField(
+        view_name='notes:notes-detail',
+        # source='id'
+    )
     content_type = serializers.CharField()
     time = serializers.DateTimeField()
     is_deleted = serializers.BooleanField(default=False)
-    # tags_url = URLReadOnlyField(viewname='tag-of-note')
-    # users = serializers.HyperlinkedRelatedField(view_name='notes:users-detail', queryset=User.objects.all())
-    # users = URLReadOnlyField(view_name='notes:users-detail')
-    # users = UserSerializer(many=True)
     users = serializers.SlugRelatedField(many=True,
                                          read_only=True,
                                          slug_field='username')
     is_public = serializers.BooleanField(default=False)
-    # tags = TagWriteOnlyField()
-    # content_url = URLReadOnlyField(viewname='content-of-note')
     notetext_set = NoteTextSerializer(many=True)
-    # tags = TagSerializer(many=True)
-    tags_nest = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', source='tags')
+    tags = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='name',
+        source='tags'
+    )
+
+    def create(self, validated_data):
+        """
+
+        :param validated_data:
+        :return:
+        """
+
+        note = Note.objects.create(**serializer.validated_data)
+        note.users.add(request.user)
+        note.save()
 
 
 

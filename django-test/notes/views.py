@@ -46,7 +46,7 @@ class NotesView(LoginRequiredMixin, generic.TemplateView):
         return JsonResponse(data, safe=False)
 
 
-class   PublicNoteView(generic.TemplateView):
+class PublicNoteView(generic.TemplateView):
     """
     Xem public note cua nguoi khac.
     """
@@ -103,6 +103,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from django.http import Http404
 from .serializers import UserSerializer, NoteTextSerializer, NoteSerializer, TagSerializer
+from rest_framework import status
 
 class UserListApi(APIView):
     """
@@ -115,6 +116,12 @@ class UserListApi(APIView):
                                     context={'request': request})
         return Response(serializer.data)
 
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserDetailApi(APIView):
     """
@@ -133,6 +140,41 @@ class UserDetailApi(APIView):
                                     context={'request': request})
         return Response(serializer.data)
 
+    def put(self, request, username, format=None):
+        user = self.get_object(username)
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            User.objects.filter(username=username).update(**serializer.validated_data)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, username, format=None):
+        user = self.get_object(username)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class NotesListApi(APIView):
+    """
+
+    """
+
+    def get(self, request, format=None):
+        notes = Note.objects.filter(user=request.user)
+        serializer = NoteSerializer(notes,
+                                    many=True,
+                                    context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = NoteSerializer(data=request.data)
+        if serializer.is_valid():
+            note = Note.objects.create(**serializer.validated_data)
+            note.users.add(request.user)
+            note.save()
+            _serializer = NoteSerializer(note)
+            return Response(_serializer.data)
 
 class NotesOfUserApi(APIView):
     """
@@ -141,6 +183,26 @@ class NotesOfUserApi(APIView):
     """
     def get(self, request, username, format=None):
         notes = Note.objects.filter(users__username=username)
+        serializer = NoteSerializer(notes,
+                                    many=True,
+                                    context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, username, format=None):
+        serializer = NoteSerializer(data=request.data)
+        if serializer.is_valid():
+            Note.objects.create(**serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotesOfTagApi(APIView):
+    """
+    notes:notes_of_tag
+    /tags/`tagname`/
+    """
+    def get(self, request, name, format=None):
+        notes = Note.objects.filter(tags__name=name)
         serializer = NoteSerializer(notes,
                                     many=True,
                                     context={'request': request})
@@ -186,3 +248,4 @@ class TagListApi(APIView):
                                    many=True,
                                    context={'request': request})
         return Response(serializer.data)
+
