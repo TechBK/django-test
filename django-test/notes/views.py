@@ -97,7 +97,7 @@ class AddNoteView(LoginRequiredMixin, generic.View):
 
 
 ############################################################
-
+from django.contrib.auth import forms as auth_forms
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
@@ -117,11 +117,19 @@ class UserListApi(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = User.objects.create(**serializer.validated_data)
+        # serializer = UserSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     user = User.objects.create(**serializer.validated_data)
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        form = auth_forms.UserCreationForm(request.data)
+        if form.is_valid():
+            user = form.save()
+            serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserDetailApi(APIView):
     """
@@ -142,11 +150,17 @@ class UserDetailApi(APIView):
 
     def put(self, request, username, format=None):
         user = self.get_object(username)
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            User.objects.filter(username=username).update(**serializer.validated_data)
+        request.data['username'] = request.data.pop('username', username)
+        request.data['date_joined'] = request.data.pop('date_joined', user.date_joined)
+        form = auth_forms.UserChangeForm(request.data, instance=user)
+        if form.is_valid():
+            user = form.save()
+            serializer = UserSerializer(user)
+        # if serializer.is_valid():
+        #     User.objects.filter(username=username).update(**serializer.validated_data)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def delete(self, request, username, format=None):
         user = self.get_object(username)
@@ -157,24 +171,28 @@ class UserDetailApi(APIView):
 
 class NotesListApi(APIView):
     """
-
+    notes:notes
+    notes/
     """
 
     def get(self, request, format=None):
-        notes = Note.objects.filter(user=request.user)
+        notes = Note.objects.get(user=request.user)
         serializer = NoteSerializer(notes,
                                     many=True,
                                     context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = NoteSerializer(data=request.data)
+        serializer = NoteSerializer(data=request.data,
+                                    context={'request':request})
         if serializer.is_valid():
-            note = Note.objects.create(**serializer.validated_data)
-            note.users.add(request.user)
-            note.save()
-            _serializer = NoteSerializer(note)
-            return Response(_serializer.data)
+            # note = Note.objects.create(**serializer.validated_data)
+            # note.users.add(request.user)
+            # note.save()
+            # _serializer = NoteSerializer(note)
+            note = serializer.save()
+            return Response(serializer.data)
+
 
 class NotesOfUserApi(APIView):
     """
@@ -189,10 +207,12 @@ class NotesOfUserApi(APIView):
         return Response(serializer.data)
 
     def post(self, request, username, format=None):
-        serializer = NoteSerializer(data=request.data)
+        serializer = NoteSerializer(data=request.data, context={'request': request})
+        # return Response(request.data)
         if serializer.is_valid():
-            Note.objects.create(**serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # serializer.save()
+            # Note.objects.create(**serializer.validated_data)
+            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

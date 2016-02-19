@@ -30,17 +30,19 @@ urlpatterns = [
         UserListApi.as_view(),
         name='users'),
 
-    url(r'^users/(?P<username>\D+)/$',
+    url(r'^users/(?P<username>\w+)/$',
         UserDetailApi.as_view(),
         name='users-detail'),
-
-    url(r'^notes/(?P<username>\D+)/$',
-        NotesOfUserApi.as_view(),
-        name='notes-of-user'),
 
     url(r'^notes/(?P<pk>[0-9]+)/$',
         NoteDetailApi.as_view(),
         name='notes-detail'),
+
+    url(r'^notes/(?P<username>\w+)/$',
+        NotesOfUserApi.as_view(),
+        name='notes-of-user'),
+
+
 
     url(r'^notes/(?P<note_pk>[0-9]+)/tags/$',
         TagsOfNoteApi.as_view(),
